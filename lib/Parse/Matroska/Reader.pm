@@ -8,7 +8,6 @@ use Parse::Matroska::Element;
 use Carp;
 use Scalar::Util qw{openhandle weaken};
 use IO::Handle;
-use IO::String;
 use IO::File;
 use List::Util qw{first};
 use Encode;
@@ -24,10 +23,7 @@ sub new {
 
 sub init {
     my ($self, $arg) = (@_);
-    $self->{fh} = openhandle($arg) //
-            (ref $arg eq "SCALAR"
-                ? IO::String->new($$arg)
-                : IO::File->new($arg, "<:raw"))
+    $self->{fh} = openhandle($arg) // IO::File->new($arg, "<:raw")
         or croak $!;
 }
 

@@ -53,7 +53,7 @@ sub readlen {
 # converts a byte string into an integer
 sub _bin2int($) {
     my ($bin) = @_;
-    if (length($bin) > 7) {
+    if (length($bin) > 4) {
         use bigint try => 'GMP';
         return hex(unpack("H*", $bin));
     }

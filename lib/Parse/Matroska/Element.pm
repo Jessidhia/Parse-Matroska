@@ -100,6 +100,8 @@ excluding the header.
 A weakened reference to the associated
 L<Parse::Matroska::Reader>.
 
+=back
+
 =head1 METHODS
 
 =over

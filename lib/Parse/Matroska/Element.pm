@@ -75,7 +75,7 @@ sub next_child {
             return;
         }
         my $ret = $self->{value}->[$idx];
-        
+
         ++$idx;
         $self->{_last_child} = $idx;
         return $ret;

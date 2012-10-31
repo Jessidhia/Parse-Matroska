@@ -177,7 +177,7 @@ sub getpos {
 sub setpos {
     my ($self, $pos) = @_;
     return undef unless $pos && $self->{fh}->can('setpos');
-    
+
     my $ret = $self->{fh}->setpos($pos);
     croak "Cannot seek to correct position"
         unless $self->getpos eq $pos;
@@ -194,6 +194,7 @@ sub read_element {
     my $elem_def = elem_by_hexid($elid);
     my ($size_len, $content_len) = $self->read_size;
     my $full_len = length($elid)/2 + $size_len + $content_len;
+
 
     my $elem = Parse::Matroska::Element->new(
         elid => $elid,

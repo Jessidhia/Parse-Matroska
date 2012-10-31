@@ -29,7 +29,7 @@ sub open {
 sub init {
     my ($self, $arg) = @_;
     $self->{fh} = openhandle($arg) // IO::File->new($arg, "<:raw")
-        or croak $!;
+        or croak "Can't open $arg: $!";
 }
 
 sub close {
@@ -41,7 +41,7 @@ sub close {
 sub _getc {
     my ($self) = @_;
     my $c = $self->{fh}->getc;
-    croak $! if !defined $c && $!;
+    croak "Can't do read of length 1: $!" if !defined $c && $!;
     return $c;
 }
 
@@ -49,7 +49,8 @@ sub readlen {
     my ($self, $len) = @_;
     my $data;
     my $readlen = $self->{fh}->read($data, $len);
-    croak $!     unless defined $readlen;
+    croak "Can't do read of length $len: $!"
+                 unless defined $readlen;
     return undef unless $len == $readlen;
     return $data;
 }

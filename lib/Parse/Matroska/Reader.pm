@@ -78,7 +78,9 @@ this object will close the given filehandle as well.
 
 =item * A scalar containing a path to a file.
 
-=item * A scalarref pointing to EBML data.
+=item * On perl v5.14 or newer, a scalarref pointing to
+EBML data. For similar functionality in older perls,
+give an L<IO::String> object.
 
 =back
 

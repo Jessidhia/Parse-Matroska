@@ -37,7 +37,9 @@ is $chld->{value}, "matroska", "DocType is 'matroska'";
 $r->close;
 
 my $test_str = "\x1a\x45\xdf\xa3\xa3";
-ok $r->open(\$test_str), "Can open string readers";
-ok $elem = $r->read_element, "Can read a single element from string";
+SKIP: {
+    skip q{Perls older than v5.14 don't like IO::File->new(\$scalar, '<:raw')}, 2 if $] < 5.014;
 
-done_testing();
+    ok $r->open(\$test_str), "Can open string readers";
+    ok $elem = $r->read_element, "Can read a single element from string";
+}

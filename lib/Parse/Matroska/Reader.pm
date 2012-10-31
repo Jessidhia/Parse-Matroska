@@ -17,16 +17,11 @@ sub new {
     my $self = {};
     bless $self, $class;
 
-    $self->init(@_);
+    $self->open(@_) if @_;
     return $self;
 }
 
 sub open {
-    my ($self, @args) = @_;
-    return $self->init(@args);
-}
-
-sub init {
     my ($self, $arg) = @_;
     $self->{fh} = openhandle($arg) // IO::File->new($arg, "<:raw")
         or croak "Can't open $arg: $!";

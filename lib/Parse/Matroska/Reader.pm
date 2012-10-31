@@ -1,3 +1,4 @@
+use 5.008;
 use strict;
 use warnings;
 
@@ -84,7 +85,7 @@ this object will close the given filehandle as well.
 =cut
 sub open {
     my ($self, $arg) = @_;
-    $self->{fh} = openhandle($arg) // IO::File->new($arg, "<:raw")
+    $self->{fh} = openhandle($arg) || IO::File->new($arg, "<:raw")
         or croak "Can't open $arg: $!";
 }
 

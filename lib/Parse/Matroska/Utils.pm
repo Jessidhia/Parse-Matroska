@@ -38,7 +38,7 @@ Converts a "StringLikeTHIS" into a
 
 =cut
 sub uncamelize($) {
-    my $_ = shift;
+    local $_ = shift;
     # lc followed by UC: lc_UC
     s/(?<=[a-z])([A-Z])/_$1/g;
     # UC followed by two lc: _UClclc

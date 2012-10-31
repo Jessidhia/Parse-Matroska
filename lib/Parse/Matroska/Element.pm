@@ -1,3 +1,4 @@
+use 5.008;
 use strict;
 use warnings;
 
@@ -131,7 +132,7 @@ sub initialize {
     for (keys %args) {
         $self->{$_} = $args{$_};
     }
-    $self->{depth} //= 0;
+    $self->{depth} = 0 unless $self->{depth};
 }
 
 =item skip
@@ -205,7 +206,7 @@ sub next_child {
     return unless $self->{type} eq 'sub';
 
     if ($self->{_all_children_read}) {
-        my $idx = $self->{_last_child} //= 0;
+        my $idx = $self->{_last_child} ||= 0;
         if ($idx == @{$self->{value}}) {
             # reset the iterator, returning undef once
             $self->{_last_child} = 0;
@@ -218,7 +219,9 @@ sub next_child {
         return $ret;
     }
 
-    my $len = $self->{remaining_len} // $self->{content_len};
+    my $len = defined $self->{remaining_len}
+        ? $self->{remaining_len}
+        : $self->{content_len};
 
     if ($len == 0) {
         # we've read all children; switch into $self->{value} iteration mode
@@ -227,7 +230,7 @@ sub next_child {
         return;
     }
 
-    $self->{pos_offset} //= 0;
+    $self->{pos_offset} ||= 0;
     my $pos = $self->{data_pos};
     my $reader = $self->{reader} or croak "The associated reader has been deleted";
     $reader->setpos($pos);
@@ -244,7 +247,7 @@ sub next_child {
     }
 
     $chld->{depth} = $self->{depth} + 1;
-    $self->{value} //= [];
+    $self->{value} ||= [];
 
     push @{$self->{value}}, $chld;
 

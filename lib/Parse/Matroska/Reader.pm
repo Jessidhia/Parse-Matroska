@@ -46,7 +46,6 @@ sub readlen {
     my $readlen = $self->{fh}->read($data, $len);
     croak "Can't do read of length $len: $!"
                  unless defined $readlen;
-    return undef unless $len == $readlen;
     return $data;
 }
 

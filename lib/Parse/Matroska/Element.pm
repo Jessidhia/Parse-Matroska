@@ -150,8 +150,6 @@ sub skip {
     $reader->skip($self->{content_len});
 }
 
-# the optional second parameter will keep the value
-# of 'binary' fields in $self->{value}.
 =item get_value(keep_bin)
 
 Returns the value contained by this EBML element.

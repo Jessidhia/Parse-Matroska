@@ -203,8 +203,6 @@ sub read_size {
     return ($i+1, _bin2int $t . $self->readlen($i));
 }
 
-{
-    my $utf8 = find_encoding("UTF-8");
 =item read_str(length)
 
 Reads a string of length C<length> bytes from the internal filehandle.
@@ -212,6 +210,8 @@ The string is already L<Encode/decode>d from C<UTF-8>, which is the
 standard Matroska string encoding.
 
 =cut
+{
+    my $utf8 = find_encoding("UTF-8");
     sub read_str {
         my ($self, $length) = @_;
         return $utf8->decode($self->readlen($length));

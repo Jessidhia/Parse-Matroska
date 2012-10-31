@@ -428,9 +428,10 @@ sub read_element {
 =head1 CAVEATS
 
 Children elements have to be processed as soon as an element
-with children is found, or their children ignored with C<skip>.
-Not doing so doesn't cause errors but results in an invalid
-structure, with constant '0' depth.
+with children is found, or their children ignored with
+L<Parse::Matroska::Element/skip>. Not doing so doesn't cause
+errors but results in an invalid structure, with constant '0'
+depth.
 
 To work correctly in unseekable streams, either the contents
 of 'binary'-type elements has to be ignored or the C<read_bin>

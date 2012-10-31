@@ -2,10 +2,114 @@ use strict;
 use warnings;
 
 package Parse::Matroska::Element;
+=head1 NAME
 
+Parse::Matroska::Element
+
+=cut
 use Carp;
 use List::Util qw{first};
 
+=head1 SYNOPSIS
+
+    use Parse::Matroska::Reader;
+    my $reader = Parse::Matroska::Reader->new($path);
+    my $elem = $reader->read_element;
+
+    print "ID: $elem->{elid}\n";
+    print "Name: $elem->{name}\n";
+    print "Length: $elem->{content_len}\n";
+    print "Type: $elem->{type}\n";
+    print "Child count: ", scalar(@{$elem->all_children}), "\n";
+    if ($elem->{type} eq 'sub') {
+        while (my $chld = $elem->next_child) {
+            print "Child Name: $chld->{name}\n";
+        }
+    } else {
+        print "Value: ", $elem->get_value, "\n";
+    }
+
+=head1 DESCRIPTION
+
+Represents a single Matroska element as decoded by
+L<Parse::Matroska::Reader>. This is essentially a hash
+augmented with functions for delay-loading of binary
+values and children elements.
+
+=head1 NOTE
+
+The API of this module is not yet considered stable.
+
+=head1 FIELDS
+
+=over
+
+=item elid
+
+The EBML Element ID, suitable for passing to
+L<Parse::Matroska::Definitions/elem_by_hexid>.
+
+=item name
+
+The EBML Element's name.
+
+=item type
+
+The EBML Element's type. Can be 'uint', 'sint',
+'float', 'ebml_id', 'str' or 'binary'. See L</value>
+for details.
+
+=item value
+
+The EBML Element's value. Should be obtained through
+L</get_value>.
+
+Is an unicode string if the L</type> is C<str>, that is,
+the string has already been L<Encode/decode>d.
+
+Is undef if the L</type> is C<binary> and the contents
+were delay-loaded and not yet read. L</get_type> will
+do the delayed load if needed.
+
+Is an arrayref if the L</type> is C<sub>, containing
+the children nodes that were already loaded.
+
+Is a hashref if the L</type> is C<ebml_id>, containing
+the referred element's information as defined in
+L<Parse::Matroska::Definitions>. Calling
+C<elem_by_hexid($elem-E<gt>{value}-E<gt>{elid})> will
+return the same object as $elem->{value}.
+
+=item full_len
+
+The entire length of this EBML Element, including
+the header.
+
+=item size_len
+
+The length of the size marker. Used when calculating
+L</full_len> from L</content_len>
+
+=item content_len
+
+The length of the contents of this EBML Element,
+excluding the header.
+
+=item reader
+
+A weakened reference to the associated
+L<Parse::Matroska::Reader>.
+
+=head1 METHODS
+
+=over
+
+=item new(%hash)
+
+Creates a new Element initialized with the hash
+given as argument.
+
+=cut
 sub new {
     my $class = shift;
     my $self = {};
@@ -15,6 +119,11 @@ sub new {
     return $self;
 }
 
+=item initialize(%hash)
+
+Called by new on initialization.
+
+=cut
 sub initialize {
     my ($self, %args) = @_;
     for (keys %args) {
@@ -23,6 +132,12 @@ sub initialize {
     $self->{depth} //= 0;
 }
 
+=item skip
+
+Called by the user to ignore the contents of this EBML node.
+Needed when ignoring the children of a node.
+
+=cut
 sub skip {
     my ($self) = @_;
     my $reader = $self->{reader};
@@ -35,6 +150,17 @@ sub skip {
 
 # the optional second parameter will keep the value
 # of 'binary' fields in $self->{value}.
+=item get_value(keep_bin)
+
+Returns the value contained by this EBML element.
+
+If the element has children, returns an arrayref to
+the children elements that were already encountered.
+
+If the element's type is "binary" and the value was
+delay-loaded, does the reading now.
+
+=cut
 sub get_value {
     my ($self, $keep_bin) = @_;
 
@@ -60,9 +186,20 @@ sub get_value {
     }
 }
 
-# Builtin iterator;
-# optional parameter has new elements loaded from disk
-# also read their 'binary' data
+=item next_child(read_bin)
+
+Builtin iterator; reads and returns the next child element.
+Returns undef if the type isn't 'sub'; returns undef at
+the end of the iterator and resets itself to point to the
+first element.
+
+The optional C<read_bin> parameter has the children elements
+not delay-load their value if their type is 'binary'.
+
+If all children elements have already been read, return
+the elements in-order as would be given by L</all_children>.
+
+=cut
 sub next_child {
     my ($self, $read_bin) = @_;
     return unless $self->{type} eq 'sub';
@@ -114,12 +251,30 @@ sub next_child {
     return $chld;
 }
 
+=item all_children(recurse,read_bin)
+
+Calls L</populate_children(recurse,read_bin)> on self
+and returns an arrayref with the children nodes.
+
+Both C<recurse> and C<read_bin> are optional and default
+to false.
+
+=cut
 sub all_children {
     my ($self, $recurse, $read_bin) = @_;
     $self->populate_children($recurse, $read_bin);
     return $self->{value};
 }
 
+=item children_by_name(name)
+
+Searches in the already read children elements for all
+elements with the EBML name C<name>. Returns the found
+element if only one was found, or an arrayref containing
+all found elements. If no elements are found, an empty
+arrayref is returned.
+
+=cut
 sub children_by_name {
     my ($self, $name) = @_;
     my $ret = [grep { $_->{name} eq $name } @{$self->{value}}];
@@ -128,8 +283,27 @@ sub children_by_name {
     return $ret;
 }
 
-# calling populate_children(1,1) on the very first element read
-# should load the entire file into memory and eliminate seeks
+=item populate_children(recurse,read_bin)
+
+Populates the internal array of children elements, that is,
+requests that the associated L<Matroska::Parser::Reader> reads
+all children elements.
+
+If C<recurse> is provided and is true, the method will call
+itself in the children elements with the same parameters it
+received; this will build a full EBML children tree.
+
+If C<read_bin> is provided and is true, disables delay-loading
+of the contents of 'binary'-type nodes, reading the contents
+to memory.
+
+If both C<recurse> and C<read_bin> are true, entire EBML trees
+can be loaded without requiring seeks, thus behaving correctly
+on unseekable streams. If C<read_bin> is false, the entire EBML
+tree is still loaded, but calling L</get_value> on 'binary'-type
+nodes will produce an error on unseekable streams.
+
+=cut
 sub populate_children {
     my ($self, $recurse, $read_bin) = @_;
 
@@ -151,3 +325,17 @@ sub populate_children {
 }
 
 1;
+
+=back
+
+=head1 AUTHOR
+
+Diogo Franco <diogomfranco@gmail.com>, aka Kovensky.
+
+=head1 SEE ALSO
+
+L<Parse::Matroska::Reader>, L<Parse::Matroska::Definitions>.
+
+=head1 LICENSE
+
+The FreeBSD license, equivalent to the ISC license.

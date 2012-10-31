@@ -5,12 +5,13 @@ use warnings;
 use Test::More tests => 14;
 use FindBin;
 use Data::Dumper;
+use File::Spec::Functions qw{catfile};
 
 BEGIN {
     use_ok("Parse::Matroska::Reader");
 }
 
-my $path = "$FindBin::Bin/vectors/dist.ini.mkv";
+my $path = catfile($FindBin::Bin, qw{vectors dist.ini.mkv});
 
 ok -e $path, "vectors/dist.ini.mkv is present";
 ok my $r = Parse::Matroska::Reader->new($path), "Reader can be instantiated";

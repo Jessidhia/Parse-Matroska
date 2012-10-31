@@ -1,4 +1,5 @@
-use common::sense;
+use strict;
+use warnings;
 
 package Parse::Matroska;
 

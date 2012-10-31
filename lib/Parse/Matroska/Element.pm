@@ -1,4 +1,6 @@
-use common::sense;
+use strict;
+use warnings;
+
 package Parse::Matroska::Element;
 
 use Carp;
@@ -27,7 +29,7 @@ sub skip {
     return unless $reader; # we don't have to skip if there's no reader
     my $pos = $reader->getpos;
     croak "Too late to skip, reads were already done"
-        if $pos != $self->{data_pos};
+        if $pos ne $self->{data_pos};
     $reader->skip($self->{content_len});
 }
 

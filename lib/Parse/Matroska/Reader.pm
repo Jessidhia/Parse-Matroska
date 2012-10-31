@@ -1,4 +1,5 @@
-use common::sense;
+use strict;
+use warnings;
 
 package Parse::Matroska::Reader;
 use Parse::Matroska::Definitions qw{elem_by_hexid};
@@ -172,7 +173,7 @@ sub setpos {
     
     my $ret = $self->{fh}->setpos($pos);
     croak "Cannot seek to correct position"
-        unless $self->getpos == $pos;
+        unless $self->getpos eq $pos;
     return $ret;
 }
 

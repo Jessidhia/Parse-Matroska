@@ -1,4 +1,6 @@
-use common::sense;
+use strict;
+use warnings;
+
 package Parse::Matroska::Definitions;
 
 use Parse::Matroska::Utils qw{uniq uncamelize};

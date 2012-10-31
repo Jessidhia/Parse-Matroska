@@ -168,7 +168,6 @@ sub get_value {
     return undef if $self->{type} eq 'skip';
     return $self->{value} if $self->{value};
 
-
     my $reader = $self->{reader} or
         croak "The associated Reader has been deleted";
 

@@ -378,7 +378,6 @@ sub read_element {
     my ($size_len, $content_len) = $self->read_size;
     my $full_len = length($elid)/2 + $size_len + $content_len;
 
-
     my $elem = Parse::Matroska::Element->new(
         elid => $elid,
         name => $elem_def && $elem_def->{name},

@@ -21,10 +21,21 @@ sub new {
     return $self;
 }
 
+sub open {
+    my ($self, @args) = @_;
+    return $self->init(@args);
+}
+
 sub init {
-    my ($self, $arg) = (@_);
+    my ($self, $arg) = @_;
     $self->{fh} = openhandle($arg) // IO::File->new($arg, "<:raw")
         or croak $!;
+}
+
+sub close {
+    my ($self) = @_;
+    $self->{fh}->close;
+    delete $self->{fh};
 }
 
 sub _getc {

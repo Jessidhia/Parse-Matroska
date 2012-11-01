@@ -2,12 +2,8 @@ use 5.008;
 use strict;
 use warnings;
 
+# ABSTRACT: internal EBML grammar definitions
 package Parse::Matroska::Definitions;
-=head1 NAME
-
-Parse::Matroska::Definitions
-
-=cut
 
 use Parse::Matroska::Utils qw{uniq uncamelize};
 
@@ -39,30 +35,28 @@ The API of this module is not yet considered stable.
 
 These global variables are considered B<immutable>.
 
-=over
-
-=item @Parse::Matroska::Definitions::global_elem_list
+=head2 @Parse::Matroska::Definitions::global_elem_list
 
 A global list of known matroska elements. Useful for
 mpv's matroska script, used for generating C headers
 that parse matroska.
 
-=item %Parse::Matroska::Definitions::global_elem_dict
+=head2 %Parse::Matroska::Definitions::global_elem_dict
 
 A global hash of known matroska elements. Used internally
-by L</elem_by_hexid>.
+by L</elem_by_hexid($id)>.
 
 =cut
 
 @Parse::Matroska::Definitions::global_elem_list = ();
 %Parse::Matroska::Definitions::global_elem_dict = ();
 
-=item %EBML_DEFINITION
+=head2 %EBML_DEFINITION
 
 Optionally-importable hash of known EBML IDs belonging
 to the EBML generic grammar.
 
-=item %MATROSKA_DEFINITION
+=head2 %MATROSKA_DEFINITION
 
 Optionally-importable hash of known EBML IDs belonging
 to the Matroska-specific grammar.
@@ -72,13 +66,7 @@ to the Matroska-specific grammar.
 our %EBML_DEFINITION = define_ebml();
 our %MATROSKA_DEFINITION = define_matroska();
 
-=back
-
-=head1 METHODS
-
-=over
-
-=item elem_by_hexid(id)
+=method elem_by_hexid($id)
 
 Returns an EBML Element Definition corresponding to the provided
 hexadecimal string. Returns C<undef> if the element is unknown.
@@ -106,74 +94,48 @@ use constant TYPE_MAP => {
 # this will be localized to "MATROSKA" or "EBML" on the elem declarations
 our $ELEM_DEFINE_TYPE = undef;
 
-=item elem(name,elid,valtype)
+=method elem($name,$elid,$valtype)
 
 NOTE: never call this function yourself; it changes data structures
 that are considered immutable outside of this package.
 
 Internal API function that generates the EBML Element Definitions.
 
-This API function returns an array which first element is C<elid>
+This API function returns an array which first element is C<$elid>
 and the second is a generated hash. The generated hash is stored
 in the @global_elem_list and %global_elem_dict.
 
 The generated hash contains:
 
-=over
-
-=item name
-
-The EBML Element's name, given through C<name>.
-
-=item elid
-
-The EBML Element's hex id, given through C<elid>. Used for lookups by L</elem_by_hexid>.
-
-=item valtype
-
-The EBML Element's type, given through C<valtype>, except when C<valtype> is an arrayref.
-
-=item multiple
-
-If C<name> ends with a '*', is set as true and strips the '*' from L</name>. Used to mark
-elements that may be repeated.
-
-=item subelements
-
-An arrayref of elements that may be children of this element, given through C<valtype>
-if it is an arrayref. Sets L</type> to 'sub' if there are subelements.
-
-=item subids
-
+=for :list
+= name
+The EBML Element's name, given through C<$name>.
+= elid
+The EBML Element's hex id, given through C<$elid>. Used for lookups by L</elem_by_hexid($id)>.
+= valtype
+The EBML Element's type, given through C<$valtype>, except when C<$valtype> is an arrayref.
+= multiple
+If C<$name> ends with a C<*>, this is set as true and strips the C<*> from L</name>. Used to
+mark elements that may be repeated.
+= subelements
+An arrayref of elements that may be children of this element, given through C<$valtype> if it
+is an arrayref. Sets L</valtype> to C<sub> if there are subelements.
+= subids
 An arrayref listing all the L</elid>s of subelements, C<uniq>ified.
-
-=back
 
 The following elements are for mpv compatibility:
 
-=over
-
-=item definename
-
+=for :list
+= definename
 Name used for generating C #defines.
-
-=item fieldname
-
+= fieldname
 Name used for generating C struct fields.
-
-=item structname
-
+= structname
 Name used for generating C struct names.
-
-=item ebmltype
-
-A pre-#defined constant to describe the element's type, set from C<valtype>.
-
-=item valname
-
+= ebmltype
+A pre-#defined constant to describe the element's type.
+= valname
 Typename used when declaring a struct field referring to this element.
-
-=back
 
 =cut
 sub elem {
@@ -208,7 +170,7 @@ sub elem {
 ### EBML and Matroska document definitons ###
 #############################################
 
-=item define_ebml
+=method define_ebml
 
 Internal function that defines the EBML generic grammar.
 
@@ -234,7 +196,7 @@ sub define_ebml {
 }
 
 
-=item define_matroska
+=method define_matroska
 
 Internal function that defines the Matroska-specific EBML grammar.
 
@@ -386,17 +348,3 @@ sub define_matroska {
 }
 
 1;
-
-=back
-
-=head1 AUTHOR
-
-Diogo Franco <diogomfranco@gmail.com>, aka Kovensky.
-
-=head1 SEE ALSO
-
-L<Parse::Matroska::Reader>, L<Parse::Matroska::Element>.
-
-=head1 LICENSE
-
-The FreeBSD license, equivalent to the ISC license.

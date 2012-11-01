@@ -1,29 +1,18 @@
 use strict;
 use warnings;
 
+# ABSTRACT: internally-used helper functions
 package Parse::Matroska::Utils;
-=head1 NAME
-
-Parse::Matroska::Utils
-
-=head1 DESCRIPTION
-
-Internally-used helper functions
-
-=cut
 
 use Exporter;
 our @ISA       = qw{Exporter};
 our @EXPORT_OK = qw{uniq uncamelize};
 
-=head1 FUNCTIONS
-
-=over
-
-=item uniq(@array)
+=method uniq(@array)
 
 The same as L<List::MoreUtils/"uniq LIST">.
-Included to avoid depending on it.
+Included to avoid depending on it since it's
+not a core module.
 
 =cut
 sub uniq(@) {
@@ -31,7 +20,7 @@ sub uniq(@) {
   return grep { !$seen{$_}++ } @_;
 }
 
-=item uncamelize($string)
+=method uncamelize($string)
 
 Converts a "StringLikeTHIS" into a
 "string_like_this".
@@ -46,13 +35,3 @@ sub uncamelize($) {
     # strip leading _ that the second regexp might add; lowercase all
     s/^_//; lc
 }
-
-=back
-
-=head1 AUTHOR
-
-Diogo Franco <diogomfranco@gmail.com>, aka Kovensky.
-
-=head1 LICENSE
-
-The FreeBSD license, equivalent to the ISC license.

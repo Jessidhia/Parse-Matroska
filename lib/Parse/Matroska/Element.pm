@@ -2,12 +2,9 @@ use 5.008;
 use strict;
 use warnings;
 
+# ABSTRACT: a mid-level representation of an EBML element
 package Parse::Matroska::Element;
-=head1 NAME
 
-Parse::Matroska::Element
-
-=cut
 use Carp;
 use List::Util qw{first};
 
@@ -41,35 +38,34 @@ values and children elements.
 
 The API of this module is not yet considered stable.
 
-=head1 FIELDS
-
-=over
-
-=item elid
+=attr elid
 
 The EBML Element ID, suitable for passing to
 L<Parse::Matroska::Definitions/elem_by_hexid>.
 
-=item name
+=attr name
 
 The EBML Element's name.
 
-=item type
+=attr type
 
-The EBML Element's type. Can be 'uint', 'sint',
-'float', 'ebml_id', 'str' or 'binary'. See L</value>
+The EBML Element's type. Can be C<uint>, C<sint>,
+C<float>, C<ebml_id>, C<str> or C<binary>. See L</value>
 for details.
 
-=item value
+Equivalent to
+C<elem_by_hexid($elem-E<gt>{value})-E<gt>{valtype}>.
+
+=attr value
 
 The EBML Element's value. Should be obtained through
 L</get_value>.
 
 Is an unicode string if the L</type> is C<str>, that is,
-the string has already been L<Encode/decode>d.
+the string has already been decoded by L<Encode/decode>.
 
-Is undef if the L</type> is C<binary> and the contents
-were delay-loaded and not yet read. L</get_type> will
+Is C<undef> if the L</type> is C<binary> and the contents
+were delay-loaded and not yet read. L</get_value> will
 do the delayed load if needed.
 
 Is an arrayref if the L</type> is C<sub>, containing
@@ -81,33 +77,27 @@ L<Parse::Matroska::Definitions>. Calling
 C<elem_by_hexid($elem-E<gt>{value}-E<gt>{elid})> will
 return the same object as $elem->{value}.
 
-=item full_len
+=attr full_len
 
 The entire length of this EBML Element, including
-the header.
+the header's.
 
-=item size_len
+=attr size_len
 
 The length of the size marker. Used when calculating
 L</full_len> from L</content_len>
 
-=item content_len
+=attr content_len
 
 The length of the contents of this EBML Element,
-excluding the header.
+which excludes the header.
 
-=item reader
+=attr reader
 
 A weakened reference to the associated
 L<Parse::Matroska::Reader>.
 
-=back
-
-=head1 METHODS
-
-=over
-
-=item new(%hash)
+=method new(%hash)
 
 Creates a new Element initialized with the hash
 given as argument.
@@ -122,9 +112,9 @@ sub new {
     return $self;
 }
 
-=item initialize(%hash)
+=method initialize(%hash)
 
-Called by new on initialization.
+Called by L</new> on initialization.
 
 =cut
 sub initialize {
@@ -135,7 +125,7 @@ sub initialize {
     $self->{depth} = 0 unless $self->{depth};
 }
 
-=item skip
+=method skip
 
 Called by the user to ignore the contents of this EBML node.
 Needed when ignoring the children of a node.
@@ -151,15 +141,19 @@ sub skip {
     $reader->skip($self->{content_len});
 }
 
-=item get_value(keep_bin)
+=method get_value($keep_bin)
 
 Returns the value contained by this EBML element.
 
 If the element has children, returns an arrayref to
 the children elements that were already encountered.
 
-If the element's type is "binary" and the value was
+If the element's type is C<binary> and the value was
 delay-loaded, does the reading now.
+
+If $keep_bin is true, the delay-loaded data is kept
+as the L</value>, otherwise, further calls to
+C<get_value> will reread the data from the L</reader>.
 
 =cut
 sub get_value {
@@ -186,18 +180,21 @@ sub get_value {
     }
 }
 
-=item next_child(read_bin)
+=method next_child($read_bin)
 
 Builtin iterator; reads and returns the next child element.
-Returns undef if the type isn't 'sub'; returns undef at
-the end of the iterator and resets itself to point to the
-first element.
+Always returns undef if the type isn't C<sub>.
 
-The optional C<read_bin> parameter has the children elements
-not delay-load their value if their type is 'binary'.
+Returns undef at the end of the iterator and resets itself to
+point to the first element; so calling L</next_child($read_bin)>
+after the iterator returned C<undef> will return the first child.
+
+The optional C<$read_bin> parameter has the children elements
+not delay-load their value if their type is C<binary>.
 
 If all children elements have already been read, return
-the elements in-order as would be given by L</all_children>.
+each element in-order as would be given by
+L</all_children($recurse,$read_bin)>.
 
 =cut
 sub next_child {
@@ -253,12 +250,12 @@ sub next_child {
     return $chld;
 }
 
-=item all_children(recurse,read_bin)
+=method all_children($recurse,$read_bin)
 
-Calls L</populate_children(recurse,read_bin)> on self
+Calls L</populate_children($recurse,$read_bin)> on self
 and returns an arrayref with the children nodes.
 
-Both C<recurse> and C<read_bin> are optional and default
+Both C<$recurse> and C<$read_bin> are optional and default
 to false.
 
 =cut
@@ -268,10 +265,10 @@ sub all_children {
     return $self->{value};
 }
 
-=item children_by_name(name)
+=method children_by_name($name)
 
 Searches in the already read children elements for all
-elements with the EBML name C<name>. Returns the found
+elements with the EBML name C<$name>. Returns the found
 element if only one was found, or an arrayref containing
 all found elements. If no elements are found, an empty
 arrayref is returned.
@@ -285,24 +282,24 @@ sub children_by_name {
     return $ret;
 }
 
-=item populate_children(recurse,read_bin)
+=method populate_children($recurse,$read_bin)
 
 Populates the internal array of children elements, that is,
 requests that the associated L<Matroska::Parser::Reader> reads
 all children elements.
 
-If C<recurse> is provided and is true, the method will call
+If C<$recurse> is provided and is true, the method will call
 itself in the children elements with the same parameters it
-received; this will build a full EBML children tree.
+received; this will build a full EBML tree.
 
-If C<read_bin> is provided and is true, disables delay-loading
-of the contents of 'binary'-type nodes, reading the contents
+If C<$read_bin> is provided and is true, disables delay-loading
+of the contents of C<binary>-type nodes, reading the contents
 to memory.
 
-If both C<recurse> and C<read_bin> are true, entire EBML trees
+If both C<$recurse> and C<$read_bin> are true, entire EBML trees
 can be loaded without requiring seeks, thus behaving correctly
-on unseekable streams. If C<read_bin> is false, the entire EBML
-tree is still loaded, but calling L</get_value> on 'binary'-type
+on unseekable streams. If C<$read_bin> is false, the entire EBML
+tree is still loaded, but calling L</get_value> on C<binary>-type
 nodes will produce an error on unseekable streams.
 
 =cut
@@ -327,17 +324,3 @@ sub populate_children {
 }
 
 1;
-
-=back
-
-=head1 AUTHOR
-
-Diogo Franco <diogomfranco@gmail.com>, aka Kovensky.
-
-=head1 SEE ALSO
-
-L<Parse::Matroska::Reader>, L<Parse::Matroska::Definitions>.
-
-=head1 LICENSE
-
-The FreeBSD license, equivalent to the ISC license.

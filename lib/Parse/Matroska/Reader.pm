@@ -2,12 +2,9 @@ use 5.008;
 use strict;
 use warnings;
 
+# ABSTRACT: a low-level reader for EBML files
 package Parse::Matroska::Reader;
-=head1 NAME
 
-Parse::Matroska::Reader
-
-=cut
 use Parse::Matroska::Definitions qw{elem_by_hexid};
 use Parse::Matroska::Element;
 
@@ -47,14 +44,10 @@ for higher level readers. TODO: write the high level readers :)
 
 The API of this module is not yet considered stable.
 
-=head1 METHODS
-
-=over
-
-=item new
+=method new
 
 Creates a new reader.
-Calls L</open(arg)> with its arguments if provided.
+Calls L</open($arg)> with its arguments if provided.
 
 =cut
 sub new {
@@ -66,23 +59,18 @@ sub new {
     return $self;
 }
 
-=item open(arg)
+=method open($arg)
 
 Creates the internal filehandle. The argument can be:
 
-=over
-
-=item * An open filehandle or L<IO::Handle> object.
-The filehandle is not C<dup()>ed, so calling L</close> in
-this object will close the given filehandle as well.
-
-=item * A scalar containing a path to a file.
-
-=item * On perl v5.14 or newer, a scalarref pointing to
-EBML data. For similar functionality in older perls,
-give an L<IO::String> object.
-
-=back
+=for :list
+* An open filehandle or L<IO::Handle> object.
+The filehandle is not C<dup()>ed, so calling L</close> in this
+object will close the given filehandle as well.
+* A scalar containing a path to a file.
+* On perl v5.14 or newer, a scalarref pointing to EBML data.
+For similar functionality in older perls, give an L<IO::String> object
+or the handle to an already C<open>ed scalarref.
 
 =cut
 sub open {
@@ -91,7 +79,7 @@ sub open {
         or croak "Can't open $arg: $!";
 }
 
-=item close
+=method close
 
 Closes the internal filehandle.
 
@@ -110,9 +98,9 @@ sub _getc {
     return $c;
 }
 
-=item readlen(length)
+=method readlen($length)
 
-Reads C<length> bytes from the internal filehandle.
+Reads C<$length> bytes from the internal filehandle.
 
 =cut
 sub readlen {
@@ -148,10 +136,10 @@ sub _ldexp {
 # of even harder to read python functions.
 # TODO: make them readable
 
-=item read_id
+=method read_id
 
 Reads an EBML ID atom in hexadecimal string format, suitable
-for passing to L<Parse::Matroska::Definitions/elem_by_hexid>.
+for passing to L<Parse::Matroska::Definitions/elem_by_hexid($id)>.
 
 =cut
 sub read_id {
@@ -172,21 +160,16 @@ sub read_id {
     return unpack "H*", ($t . $self->readlen($i));
 }
 
-=item read_size
+=method read_size
 
 Reads an EBML Data Size atom, which immediately follows
 an EBML ID atom.
 
 This returns an array consisting of:
 
-=over
-
-=item 0 The length of the Data Size atom.
-
-=item 1 The value encoded in the Data Size atom,
-which is the length of all the data following it.
-
-=back
+=for :list
+0. The length of the Data Size atom.
+1. The value encoded in the Data Size atom, which is the length of all the data following it.
 
 =cut
 sub read_size {
@@ -206,9 +189,9 @@ sub read_size {
     return ($i+1, _bin2int $t . $self->readlen($i));
 }
 
-=item read_str(length)
+=method read_str($length)
 
-Reads a string of length C<length> bytes from the internal filehandle.
+Reads a string of length C<$length> bytes from the internal filehandle.
 The string is already L<Encode/decode>d from C<UTF-8>, which is the
 standard Matroska string encoding.
 
@@ -221,12 +204,12 @@ standard Matroska string encoding.
     }
 }
 
-=item read_uint(length)
+=method read_uint($length)
 
-Reads an unsigned integer of length C<length> bytes
+Reads an unsigned integer of length C<$length> bytes
 from the internal filehandle.
 
-Returns a L<Math::BigInt> object if C<length> is greater
+Returns a L<Math::BigInt> object if C<$length> is greater
 than 4.
 
 =cut
@@ -235,12 +218,12 @@ sub read_uint {
     return _bin2int $self->readlen($length);
 }
 
-=item read_sint(length)
+=method read_sint($length)
 
-Reads a signed integer of length C<length> bytes
+Reads a signed integer of length C<$length> bytes
 from the internal filehandle.
 
-Returns a L<Math::BigInt> object if C<length> is greater
+Returns a L<Math::BigInt> object if C<$length> is greater
 than 4.
 
 =cut
@@ -258,12 +241,12 @@ sub read_sint {
     return $i;
 }
 
-=item read_float(length)
+=method read_float($length)
 
-Reads an IEEE floating point number of length C<length>
+Reads an IEEE floating point number of length C<$length>
 bytes from the internal filehandle.
 
-Only lengths '4' and '8' are supported (C 'float' and 'double').
+Only lengths C<4> and C<8> are supported (C C<float> and C<double>).
 
 =cut
 sub read_float {
@@ -286,11 +269,11 @@ sub read_float {
     return $f;
 }
 
-=item read_ebml_id(length)
+=method read_ebml_id($length)
 
-Reads an EBML ID when it's encoded as the data inside
-another EBML element, that is, when the enclosing element's
-C<type> is "ebml_id".
+Reads an EBML ID when it's encoded as the data inside another
+EBML element, that is, when the enclosing element's C<type> is
+C<ebml_id>.
 
 This returns a hashref with the EBML element description as
 defined in L<Parse::Matroska::Definitions>.
@@ -301,9 +284,9 @@ sub read_ebml_id {
     return elem_by_hexid(unpack("H*", $self->readlen($length)));
 }
 
-=item skip(length)
+=method skip($length)
 
-Skips C<length> bytes in the internal filehandle.
+Skips C<$length> bytes in the internal filehandle.
 
 =cut
 sub skip {
@@ -313,7 +296,7 @@ sub skip {
     return;
 }
 
-=item getpos
+=method getpos
 
 Wrapper for L<IO::Seekable/$io-E<gt>getpos> in the internal filehandle.
 
@@ -326,15 +309,15 @@ sub getpos {
     return $self->{fh}->getpos;
 }
 
-=item setpos(pos)
+=method setpos($pos)
 
 Wrapper for L<IO::Seekable/$io-E<gt>setpos> in the internal filehandle.
 
-Returns undef if the internal filehandle can't C<setpos>.
+Returns C<undef> if the internal filehandle can't C<setpos>.
 
 Croaks if C<setpos> does not seek to the requested position,
 that is, if calling C<getpos> does not yield the same object
-as the C<pos> argument.
+as the C<$pos> argument.
 
 =cut
 sub setpos {
@@ -347,24 +330,24 @@ sub setpos {
     return $ret;
 }
 
-=item read_element(read_bin)
+=method read_element($read_bin)
 
 Reads a full EBML element from the internal filehandle.
 
-Returns a L<Parse::Matroska::Element> initialized with the
-read data. If C<read_bin> is not present or is false, will
-delay-load the contents of 'binary' type elements, that is,
+Returns a L<Parse::Matroska::Element> object initialized with
+the read data. If C<read_bin> is not present or is false, will
+delay-load the contents of C<binary> type elements, that is,
 they will only be loaded when calling C<get_value> on the
 returned L<Parse::Matroska::Element> object.
 
 Does not read the children of the element if its type is
-'sub'. Look into the L<Parse::Matroska::Element> interface
+C<sub>. Look into the L<Parse::Matroska::Element> interface
 for details in how to read children elements.
 
-Pass a true C<read_bin> if the stream being read is not
-seekable (C<getpos> is undef) and the contents of 'binary'
-elements is desired, otherwise seeking errors or
-internal filehandle corruption might occur.
+Pass a true C<$read_bin> if the stream being read is not
+seekable (C<getpos> is undef) and the contents of C<binary>
+elements is desired, otherwise seeking errors or internal
+filehandle corruption might occur.
 
 =cut
 sub read_element {
@@ -423,29 +406,14 @@ sub read_element {
 
 1;
 
-=back
-
 =head1 CAVEATS
 
 Children elements have to be processed as soon as an element
 with children is found, or their children ignored with
 L<Parse::Matroska::Element/skip>. Not doing so doesn't cause
-errors but results in an invalid structure, with constant '0'
+errors but results in an invalid structure, with constant C<0>
 depth.
 
 To work correctly in unseekable streams, either the contents
-of 'binary'-type elements has to be ignored or the C<read_bin>
+of C<binary>-type elements has to be ignored or the C<read_bin>
 flag to C<read_element> has to be true.
-
-=head1 AUTHOR
-
-Diogo Franco <diogomfranco@gmail.com>, aka Kovensky.
-Initially based on a python script by Uoti Urpala.
-
-=head1 SEE ALSO
-
-L<Parse::Matroska::Definitions>, L<Parse::Matroska::Element>.
-
-=head1 LICENSE
-
-The FreeBSD license, equivalent to the ISC license.

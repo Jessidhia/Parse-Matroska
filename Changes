@@ -1,6 +1,8 @@
 Version history for Parse::Matroska
 
 {{$NEXT}}
+
+0.002     2012-11-02 13:06:57 UTC
 API:      Change Element->children_by_name's return value to make more sense.
           Change Element->populate_children to return self on success.
 

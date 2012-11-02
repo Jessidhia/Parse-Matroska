@@ -32,7 +32,7 @@ $elem->populate_children;
 
 ok $chld = $elem->children_by_name("DocType"), "Can find DocType element after populating";
 is $chld->{name}, "DocType", "Element found is indeed DocType";
-is $chld->{value}, "matroska", "DocType is 'matroska'";
+is $chld->get_value, "matroska", "DocType is 'matroska'";
 
 $r->close;
 

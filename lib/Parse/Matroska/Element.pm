@@ -315,14 +315,14 @@ sub populate_children {
         foreach (@{$self->{value}}) {
             $_->populate_children($recurse, $read_bin);
         }
-        return @{$self->{value}};
+        return $self;
     }
 
     while (my $chld = $self->next_child($read_bin)) {
         $chld->populate_children($recurse, $read_bin) if $recurse;
     }
 
-    return @{$self->{value}};
+    return $self;
 }
 
 1;

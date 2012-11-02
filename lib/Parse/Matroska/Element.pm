@@ -276,10 +276,12 @@ arrayref is returned.
 =cut
 sub children_by_name {
     my ($self, $name) = @_;
-    my $ret = [grep { $_->{name} eq $name } @{$self->{value}}];
-    return unless @$ret;
-    return $ret->[0] if @$ret == 1;
-    return $ret;
+    return unless defined wantarray; # don't do work if work isn't wanted
+    croak "Element can't have children" unless $self->{type} eq 'sub';
+
+    my @found = grep { $_->{name} eq $name } @{$self->{value}};
+    return @found       if wantarray;         # list
+    return shift @found if defined wantarray; # scalar
 }
 
 =method populate_children($recurse,$read_bin)

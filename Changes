@@ -1,6 +1,13 @@
 Version history for Parse::Matroska
 
 {{$NEXT}}
+API:      Change Element->children_by_name's return value to make more sense.
+          Change Element->populate_children to return self on success.
+
+Pod:      Update Element documentation to reflect changes.
+
+Tests:    Use Element->get_value instead of Element->{value} even in tests.
+          Write several more tests, improves test coverage from 65.8% to 80.7%.
 
 0.001001  2012-11-01 01:37:20 UTC
           Use [PodWeaver] to weave better POD.

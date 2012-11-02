@@ -268,10 +268,11 @@ sub all_children {
 =method children_by_name($name)
 
 Searches in the already read children elements for all
-elements with the EBML name C<$name>. Returns the found
-element if only one was found, or an arrayref containing
-all found elements. If no elements are found, an empty
-arrayref is returned.
+elements with the EBML name C<$name>. Returns an array
+containing all found elements. On scalar context,
+returns only the first element found.
+
+Croaks if the element's C<type> isn't C<sub>.
 
 =cut
 sub children_by_name {
@@ -288,7 +289,9 @@ sub children_by_name {
 
 Populates the internal array of children elements, that is,
 requests that the associated L<Matroska::Parser::Reader> reads
-all children elements.
+all children elements. Returns itself.
+
+Returns false if the element's C<type> isn't C<sub>.
 
 If C<$recurse> is provided and is true, the method will call
 itself in the children elements with the same parameters it

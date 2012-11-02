@@ -14,6 +14,10 @@ in how to use this module.
 It's intended for this module to contain high-level interfaces
 to the other modules in the distribution.
 
+=head1 SOURCE CODE
+
+L<https://github.com/Kovensky/Parse-Matroska>
+
 =head1 SEE ALSO
 
 L<Parse::Matroska::Reader>, L<Parse::Matroska::Element>,

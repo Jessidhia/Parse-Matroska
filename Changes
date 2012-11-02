@@ -5,6 +5,7 @@ API:      Change Element->children_by_name's return value to make more sense.
           Change Element->populate_children to return self on success.
 
 Pod:      Update Element documentation to reflect changes.
+          Add link to github repository in Parse/Matroska.pm
 
 Tests:    Use Element->get_value instead of Element->{value} even in tests.
           Write several more tests, improves test coverage from 65.8% to 80.7%.

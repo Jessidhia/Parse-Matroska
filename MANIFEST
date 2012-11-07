@@ -17,5 +17,6 @@ t/reader.t
 t/release-no-tabs.t
 t/release-pod-coverage.t
 t/release-pod-syntax.t
+t/utils.t
 t/vectors/dist.ini.mkv
 weaver.ini

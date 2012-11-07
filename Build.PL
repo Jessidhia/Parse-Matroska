@@ -7,9 +7,6 @@ use Module::Build 0.3601;
 
 my %module_build_args = (
   "build_requires" => {
-    "Data::Dumper" => 0,
-    "File::Spec::Functions" => 0,
-    "FindBin" => 0,
     "Module::Build" => "0.3601",
     "Test::More" => "0.94"
   },
@@ -27,20 +24,7 @@ my %module_build_args = (
   "recommends" => {},
   "recursive_test_files" => 1,
   "requires" => {
-    "Carp" => 0,
-    "Encode" => 0,
-    "Exporter" => 0,
-    "IO::File" => 0,
-    "IO::Handle" => 0,
-    "List::Util" => 0,
-    "Math::BigInt" => 0,
-    "Math::BigRat" => 0,
-    "Scalar::Util" => 0,
-    "bigrat" => 0,
-    "constant" => 0,
-    "perl" => "5.008",
-    "strict" => 0,
-    "warnings" => 0
+    "perl" => "5.008"
   },
   "script_files" => []
 );

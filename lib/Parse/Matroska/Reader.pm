@@ -121,9 +121,9 @@ sub readlen {
 # and then reading the hex-string into an integer
 sub _bin2int($) {
     my ($bin) = @_;
-    # if the length is larger than 4
+    # if the length is larger than 3
     # the resulting integer might be larger than INT_MAX
-    if (length($bin) > 4) {
+    if (length($bin) > 3) {
         return Math::BigInt->from_hex(unpack("H*", $bin));
     }
     return hex(unpack("H*", $bin));

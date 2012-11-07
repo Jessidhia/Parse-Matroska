@@ -1,6 +1,14 @@
 Version history for Parse::Matroska
 
 {{$NEXT}}
+Fix:      Correct uncamelize's output: no more DoubleUnderscoring -> double__underscoring.
+          Use BigInts when reading integers longer than 3 bytes to avoid possible signed overflow.
+          Pod::Elemental::Transformer::List is now listed by `dzil authordeps`.
+
+Other:    Add an example script, which is used in mpv-player.
+          Try using Pari and FastCalc besides GMP when loading BigInt.
+          Several changes to dist.ini.
+
 
 0.002     2012-11-02 13:06:57 UTC
 API:      Change Element->children_by_name's return value to make more sense.

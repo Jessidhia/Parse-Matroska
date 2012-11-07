@@ -1,6 +1,8 @@
 Version history for Parse::Matroska
 
 {{$NEXT}}
+
+0.003     2012-11-07 20:16:40 America/Fortaleza
 Fix:      Correct uncamelize's output: no more DoubleUnderscoring -> double__underscoring.
           Use BigInts when reading integers longer than 3 bytes to avoid possible signed overflow.
           Pod::Elemental::Transformer::List is now listed by `dzil authordeps`.

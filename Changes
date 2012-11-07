@@ -1,6 +1,6 @@
 Version history for Parse::Matroska
 
-0.003     2012-11-06 22:02:12 America/Fortaleza
+0.003     2012-11-06 22:14:29 America/Fortaleza
 
 0.002     2012-11-02 13:06:57 UTC
 API:      Change Element->children_by_name's return value to make more sense.

@@ -65,9 +65,9 @@ sub readlen {
 # and then reading the hex-string into an integer
 sub _bin2int($) {
     my ($bin) = @_;
-    # if the length is larger than 4
+    # if the length is larger than 3
     # the resulting integer might be larger than INT_MAX
-    if (length($bin) > 4) {
+    if (length($bin) > 3) {
         return Math::BigInt->from_hex(unpack("H*", $bin));
     }
     return hex(unpack("H*", $bin));
@@ -150,12 +150,13 @@ sub read_float {
     my $i = $self->read_uint($length);
     my $f;
 
+    use bigrat try => BIGINT_TRY;
+
     # These evil expressions reinterpret an unsigned int as IEEE binary floats
     if ($length == 4) {
         $f = _ldexp(($i & (1<<23 - 1)) + (1<<23), ($i>>23 & (1<<8 - 1)) - 150);
         $f = -$f if $i & (1<<31);
     } elsif ($length == 8) {
-        use bigrat try => BIGINT_TRY;
         $f = _ldexp(($i & (1<<52 - 1)) + (1<<52), ($i>>52 & (1<<12 - 1)) - 1075);
         $f = -$f if $i & (1<<63);
     } else {

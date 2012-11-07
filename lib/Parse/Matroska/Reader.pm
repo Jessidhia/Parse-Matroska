@@ -257,12 +257,13 @@ sub read_float {
     my $i = $self->read_uint($length);
     my $f;
 
+    use bigrat try => BIGINT_TRY;
+
     # These evil expressions reinterpret an unsigned int as IEEE binary floats
     if ($length == 4) {
         $f = _ldexp(($i & (1<<23 - 1)) + (1<<23), ($i>>23 & (1<<8 - 1)) - 150);
         $f = -$f if $i & (1<<31);
     } elsif ($length == 8) {
-        use bigrat try => BIGINT_TRY;
         $f = _ldexp(($i & (1<<52 - 1)) + (1<<52), ($i>>52 & (1<<12 - 1)) - 1075);
         $f = -$f if $i & (1<<63);
     } else {

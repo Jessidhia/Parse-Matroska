@@ -161,8 +161,10 @@ sub elem {
             defined ($e{valname} = TYPE_MAP->{$e{valtype}});
     }
     my $e = \%e;
-    push @Parse::Matroska::Definitions::global_elem_list, $e;
-    $Parse::Matroska::Definitions::global_elem_dict{$e{elid}} = $e;
+    if ($e{elid} ne '') {
+        push @Parse::Matroska::Definitions::global_elem_list, $e;
+        $Parse::Matroska::Definitions::global_elem_dict{$e{elid}} = $e;
+    }
     return ($e{elid}, $e);
 }
 
@@ -324,6 +326,7 @@ sub define_matroska {
                             elem('ChapLanguage*', '437c', 'str'),
                             elem('ChapCountry*',  '437e', 'str'),
                         }),
+                        elem('ChapterAtom*', '', {}),
                     }),
                 }),
             }),
